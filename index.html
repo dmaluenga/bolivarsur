@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitudes Barrio Bolívar - Chatbot Flotante</title>
-    <!-- Bootstrap 5 (para estilos base y grid) -->
+    <title>Chatbot - Consejo Comunal</title>
+    <!-- Bootstrap 5 (solo para estilos base) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,62 +12,74 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        /* Reset y fondo */
+        /* ===== ESTILOS DE FONDO ===== */
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            
+			background-image: url('fondo.jpg'); /* Reemplaza con la ruta de tu imagen */
+			background-size: cover;                 /* Hace que la imagen cubra toda la pantalla */
+			background-position: center;            /* Centra la imagen en el elemento */
+			background-repeat: no-repeat;           /* Evita que la imagen se repita */
+			background-attachment: fixed;           /* Mantiene la imagen fija al hacer scroll */
+			height: 100vh;                          /* Asegura que el body ocupe toda la altura visible */
+			margin: 0;                              /* Elimina los márgenes por defecto */
+			
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
         }
-        /* Contenedor de contenido de fondo (ejemplo) */
         .page-content {
             max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            border-radius: 20px;
             padding: 40px;
-            color: white;
+            background: #006db2;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             text-align: center;
         }
         .page-content h1 {
-            font-size: 3rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: rgb(255, 255, 255);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         .page-content p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            color: #FFFFFF;
+            font-size: 1.1rem;
         }
 
-        /* -------- CHAT FLOATING WIDGET -------- */
-        .chat-widget {
+        /* ===== CHAT FLOTANTE ===== */
+        .chat-floating {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 30px;
+            right: 30px;
             z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
         }
-        /* Botón flotante (abrir/cerrar) */
+
+        /* Botón flotante */
         .chat-toggle-btn {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #006db2 0%, #004a7c 100%);
             border: none;
             color: white;
             font-size: 28px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
             transition: all 0.3s;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         .chat-toggle-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.4);
         }
         .chat-toggle-btn .badge {
             position: absolute;
@@ -76,241 +88,293 @@
             background: #e74c3c;
             color: white;
             border-radius: 50%;
-            padding: 4px 8px;
             font-size: 12px;
+            padding: 4px 8px;
+            min-width: 22px;
+            text-align: center;
         }
 
         /* Ventana del chat */
         .chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
             width: 380px;
-            max-width: 90vw;
-            height: 550px;
-            max-height: 80vh;
+            max-height: 550px;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            display: none; /* oculta por defecto */
-            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
             overflow: hidden;
-            margin-bottom: 10px;
-            animation: slideUp 0.3s ease-out;
+            display: none; /* oculto por defecto */
+            flex-direction: column;
+            animation: slideUp 0.4s ease-out;
         }
         .chat-window.open {
             display: flex;
         }
+
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         /* Header del chat */
         .chat-header {
-            background: linear-gradient(90deg, #2c3e50, #34495e);
+            background: linear-gradient(135deg, #006db2 0%, #004a7c 100%);
             color: white;
             padding: 12px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
+            cursor: default;
         }
-        .chat-header h5 {
+        .chat-header h6 {
             margin: 0;
             font-weight: 600;
+			color: white;
         }
-        .chat-header .btn-close-min {
+        .chat-header .header-buttons {
+            display: flex;
+            gap: 10px;
+			
+        }
+        .chat-header .header-btn {
             background: none;
             border: none;
             color: white;
-            font-size: 20px;
-            cursor: pointer;
+            font-size: 18px;
             opacity: 0.8;
+            transition: 0.2s;
+            cursor: pointer;
+            padding: 0 4px;
+			
+        }
+        .chat-header .header-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .chat-header .btn-close-min {
+            font-size: 22px;
+			color: black;
         }
         .chat-header .btn-close-min:hover {
-            opacity: 1;
+            transform: rotate(90deg);
         }
 
         /* Cuerpo del chat (mensajes) */
         .chat-body {
             flex: 1;
-            overflow-y: auto;
             padding: 15px;
+            overflow-y: auto;
+            max-height: 350px;
             background: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
-        .message {
+        .chat-body .message {
+            margin-bottom: 12px;
             display: flex;
-            animation: fadeIn 0.3s ease;
+            animation: fadeInMsg 0.3s ease;
         }
-        .message.bot {
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .chat-body .bot-message {
             justify-content: flex-start;
         }
-        .message.user {
+        .chat-body .user-message {
             justify-content: flex-end;
         }
-        .message .bubble {
+        .chat-body .message-content {
             max-width: 80%;
             padding: 10px 14px;
             border-radius: 18px;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.4;
             word-wrap: break-word;
         }
-        .message.bot .bubble {
+        .chat-body .bot-message .message-content {
             background: #e9ecef;
             color: #333;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 5px;
         }
-        .message.user .bubble {
+        .chat-body .user-message .message-content {
             background: #007bff;
             color: white;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 5px;
         }
-        .message .bubble .btn-categoria {
-            margin: 4px;
-            border-radius: 20px;
-            font-size: 12px;
-            padding: 4px 12px;
-            border: 2px solid #3498db;
+
+        /* Pie del chat (inputs dinámicos) */
+        .chat-footer {
+            padding: 12px 15px;
             background: white;
-            color: #3498db;
-            transition: 0.2s;
-            cursor: pointer;
+            border-top: 1px solid #dee2e6;
         }
-        .message .bubble .btn-categoria:hover {
-            background: #3498db;
-            color: white;
+        .chat-footer .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .message .bubble .btn-categoria.seleccionada {
-            background: #2c3e50;
-            color: white;
-            border-color: #2c3e50;
+        .chat-footer .step-container .step-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #2c3e50;
         }
-        .message .bubble input[type="text"],
-        .message .bubble input[type="email"],
-        .message .bubble input[type="tel"],
-        .message .bubble textarea {
-            width: 100%;
+        .chat-footer .step-container .step-input {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
             padding: 8px 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
             font-size: 14px;
-            margin-top: 6px;
-            transition: border 0.2s;
+            width: 100%;
         }
-        .message .bubble input:focus,
-        .message .bubble textarea:focus {
+        .chat-footer .step-container .step-input:focus {
             border-color: #667eea;
             outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
         }
-        .message .bubble .btn-enviar-datos {
-            margin-top: 8px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border: none;
-            color: white;
-            font-weight: bold;
-            padding: 8px 20px;
-            border-radius: 30px;
-            transition: 0.3s;
-            width: 100%;
+        .chat-footer .btn-step {
+			background: linear-gradient(135deg, #006db2 0%, #004a7c 100%);
+			border: none;
+			color: white;
+			font-weight: 600;
+			padding: 8px 0;
+			border-radius: 8px;
+			transition: 0.3s;
+			width: 100%;
+			cursor: pointer;
+		}
+        .chat-footer .btn-step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .message .bubble .btn-enviar-datos:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
-        }
-        .message .bubble .btn-finalizar {
-            margin-top: 8px;
-            background: #28a745;
-            border: none;
-            color: white;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 30px;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .message .bubble .btn-finalizar:hover {
-            background: #218838;
-            transform: scale(1.02);
-        }
-        .message .bubble .btn-finalizar:disabled {
+        .chat-footer .btn-step:disabled {
             opacity: 0.6;
+            transform: none;
             cursor: not-allowed;
         }
-        .message .bubble .error-text {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 4px;
+
+        /* Categorías en el paso 2 */
+        .categoria-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
         }
-        .footer-chat {
-            padding: 8px 15px;
-            background: #f1f1f1;
-            text-align: center;
+        .categoria-grid .cat-btn {
+            border-radius: 20px;
             font-size: 11px;
-            color: #777;
-            border-top: 1px solid #ddd;
-            flex-shrink: 0;
+            padding: 5px 12px;
+            border: 2px solid #ced4da;
+            background: white;
+            transition: 0.2s;
+            cursor: pointer;
+            white-space: nowrap;
         }
+        .categoria-grid .cat-btn:hover {
+            transform: scale(1.05);
+        }
+        .categoria-grid .cat-btn.active {
+            background: #2c3e50;
+            border-color: #2c3e50;
+            color: white;
+        }
+        .categoria-grid .cat-btn i {
+            margin-right: 4px;
+        }
+
+        /* Colores de categorías */
+        .cat-educacion { border-color: #3498db; color: #3498db; }
+        .cat-educacion.active { background: #3498db; border-color: #3498db; color: white; }
+        .cat-vivienda { border-color: #e67e22; color: #e67e22; }
+        .cat-vivienda.active { background: #e67e22; border-color: #e67e22; color: white; }
+        .cat-proteccion { border-color: #e74c3c; color: #e74c3c; }
+        .cat-proteccion.active { background: #e74c3c; border-color: #e74c3c; color: white; }
+        .cat-salud { border-color: #2ecc71; color: #2ecc71; }
+        .cat-salud.active { background: #2ecc71; border-color: #2ecc71; color: white; }
+        .cat-economia { border-color: #f39c12; color: #f39c12; }
+        .cat-economia.active { background: #f39c12; border-color: #f39c12; color: white; }
+        .cat-agua { border-color: #1abc9c; color: #1abc9c; }
+        .cat-agua.active { background: #1abc9c; border-color: #1abc9c; color: white; }
+        .cat-seguridad { border-color: #9b59b6; color: #9b59b6; }
+        .cat-seguridad.active { background: #9b59b6; border-color: #9b59b6; color: white; }
+        .cat-ecosocialismo { border-color: #27ae60; color: #27ae60; }
+        .cat-ecosocialismo.active { background: #27ae60; border-color: #27ae60; color: white; }
+
         /* Responsive */
         @media (max-width: 480px) {
             .chat-window {
-                width: 100vw;
-                max-width: 100vw;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-                bottom: 0;
-                right: 0;
+                width: 320px;
+                right: -10px;
+                bottom: 70px;
             }
-            .chat-toggle-btn {
-                width: 56px;
-                height: 56px;
-                font-size: 24px;
+            .page-content {
+                padding: 20px;
+            }
+            .page-content h1 {
+                font-size: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
 
-<!-- Contenido de fondo (ejemplo) -->
+<!-- ===== CONTENIDO DE FONDO (página principal) ===== -->
 <div class="page-content">
-    <h1><i class="fas fa-building"></i> Barrio Bolívar</h1>
+    <h1>
+        <img src="imagenes/logocomunal.png" alt="logo consejo comunal" width="200" height="200" onerror="this.src='https://via.placeholder.com/80?text=CC'">
+        Consejo Comunal Barrio Bolívar Sur
+    </h1>
     <p>Bienvenido al sistema de solicitudes comunitarias.</p>
-    <p><i class="fas fa-arrow-down"></i> Haz clic en el botón de chat para iniciar.</p>
+    <p>Haz clic en el botón de chat para iniciar</p>
+	<i class="fas fa-arrow-down"></i>
 </div>
 
-<!-- WIDGET CHAT -->
-<div class="chat-widget">
-    <!-- Ventana del chat -->
-    <div class="chat-window" id="chatWindow">
-        <!-- Header -->
-        <div class="chat-header">
-            <h5><i class="fas fa-robot"></i> Asistente</h5>
-            <button class="btn-close-min" id="btnCloseChat" aria-label="Cerrar chat">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <!-- Cuerpo (mensajes) -->
-        <div class="chat-body" id="chatBody">
-            <!-- Los mensajes se inyectarán aquí -->
-        </div>
-        <!-- Footer -->
-        <div class="footer-chat">
-            Consejo Comunal Barrio Bolívar
-        </div>
-    </div>
+<!-- ===== CHAT FLOTANTE ===== -->
+<div class="chat-floating">
     <!-- Botón flotante -->
-    <button class="chat-toggle-btn" id="chatToggleBtn">
+    <button class="chat-toggle-btn" id="chatToggleBtn" aria-label="Abrir chat">
         <i class="fas fa-comment-dots"></i>
         <span class="badge" id="notifBadge" style="display:none;">1</span>
     </button>
+
+    <!-- Ventana del chat -->
+    <div class="chat-window" id="chatWindow">
+        <!-- Header con botones de reinicio y cerrar -->
+        <div class="chat-header" id="chatHeader">
+            <h6><i class="fas fa-robot"></i>  Asistente Virtual  </h6>
+            <div class="header-buttons">
+                <!-- Botón Reiniciar -->
+                <button class="header-btn" id="chatResetBtn" title="Reiniciar flujo">
+                    <i class="fas fa-undo-alt"></i>
+                </button>
+                <!-- Botón Cerrar -->
+                <button class="header-btn btn-close-min" id="chatMinimizeBtn" title="Cerrar chat">
+                    &times;
+                </button>
+            </div>
+        </div>
+
+        <!-- Cuerpo (mensajes) -->
+        <div class="chat-body" id="chatBody">
+            <!-- Los mensajes se insertarán dinámicamente aquí -->
+        </div>
+
+        <!-- Footer (inputs dinámicos) -->
+        <div class="chat-footer" id="chatFooter">
+            <div id="stepContainer"></div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // ============================================================
-    // CONFIGURACIÓN FIREBASE (reemplazar con tus credenciales)
-    // ============================================================
+    // =====================================================
+    // 🔥 CONFIGURACIÓN DE FIREBASE (REEMPLAZA CON TUS DATOS)
+    // =====================================================
     const firebaseConfig = {
 	  apiKey: "AIzaSyDJ-O6KlsqVtwy1HjeAXfgvkdz0Tq2c4Uc",
 	  authDomain: "proyecto-103-bolivar-sur-35fb8.firebaseapp.com",
@@ -319,289 +383,393 @@
 	  messagingSenderId: "289155082464",
 	  appId: "1:289155082464:web:2349c86b4ff1e0c1ac8885"
 	};
-    firebase.initializeApp(firebaseConfig);
+
+    // Inicializar Firebase (solo si no está ya inicializado)
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
-    // ============================================================
-    // VARIABLES GLOBALES
-    // ============================================================
-    let step = 'inicio'; // 'inicio' | 'datos' | 'categoria' | 'descripcion' | 'final'
-    let userData = {};   // almacena los datos ingresados
+    // =====================================================
+    // ESTADO Y VARIABLES GLOBALES
+    // =====================================================
+    let currentStep = 0; // 0: datos, 1: categoría, 2: descripción, 3: finalizar
+    let userData = {
+        nombre: '',
+        apellido: '',
+        cedula: '',
+        direccion: '',
+        email: '',
+        telefono: ''
+    };
     let categoriaSeleccionada = '';
-    let descripcionEscrita = '';
+    let descripcion = '';
+    let chatInitialized = false;
 
-    const chatBody = document.getElementById('chatBody');
+    // =====================================================
+    // ELEMENTOS DOM
+    // =====================================================
     const chatWindow = document.getElementById('chatWindow');
-    const toggleBtn = document.getElementById('chatToggleBtn');
-    const closeBtn = document.getElementById('btnCloseChat');
+    const chatToggleBtn = document.getElementById('chatToggleBtn');
+    const chatMinimizeBtn = document.getElementById('chatMinimizeBtn');
+    const chatResetBtn = document.getElementById('chatResetBtn');
+    const chatBody = document.getElementById('chatBody');
+    const stepContainer = document.getElementById('stepContainer');
     const notifBadge = document.getElementById('notifBadge');
 
-    // ============================================================
+    // =====================================================
     // FUNCIONES AUXILIARES
-    // ============================================================
-    function addMessage(text, isBot = true, extraHtml = '') {
+    // =====================================================
+
+    // Agregar mensaje al chat
+    function addMessage(text, isBot = true) {
         const div = document.createElement('div');
-        div.className = `message ${isBot ? 'bot' : 'user'}`;
-        div.innerHTML = `<div class="bubble">${text} ${extraHtml}</div>`;
+        div.className = `message ${isBot ? 'bot-message' : 'user-message'}`;
+        div.innerHTML = `<div class="message-content">${text}</div>`;
         chatBody.appendChild(div);
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    function clearChat() {
+    // Limpiar mensajes
+    function clearMessages() {
         chatBody.innerHTML = '';
     }
 
-    // Mostrar/ocultar ventana
-    function openChat() {
-        chatWindow.classList.add('open');
-        notifBadge.style.display = 'none';
-        // Si es primera vez, inicia el flujo
-        if (step === 'inicio') {
-            iniciarFlujo();
+    // Mostrar/ocultar chat con animación
+    function toggleChat(open) {
+        if (open === undefined) {
+            chatWindow.classList.toggle('open');
+        } else if (open) {
+            chatWindow.classList.add('open');
+        } else {
+            chatWindow.classList.remove('open');
+        }
+        // Ocultar badge al abrir
+        if (chatWindow.classList.contains('open')) {
+            notifBadge.style.display = 'none';
+        } else {
+            // Si se cierra, mostrar badge con indicador (simulado)
+            notifBadge.style.display = 'inline';
+            notifBadge.textContent = '1';
         }
     }
 
-    function closeChat() {
-        chatWindow.classList.remove('open');
-    }
-
-    // ============================================================
-    // FLUJO DE CONVERSACIÓN (paso a paso)
-    // ============================================================
-    function iniciarFlujo() {
-        step = 'datos';
-        clearChat();
-        // Mensaje de bienvenida
-        addMessage('👋 ¡Hola! Soy el asistente del Consejo Comunal Barrio Bolívar. Para iniciar tu solicitud, por favor ingresa tus datos personales.', true);
-        // Mostrar formulario de datos
-        mostrarFormularioDatos();
-    }
-
-    // ---------- PASO 1: DATOS PERSONALES ----------
-    function mostrarFormularioDatos() {
-        // Verificar si hay datos en localStorage
+    // Cargar datos desde localStorage
+    function loadLocalData() {
         const stored = localStorage.getItem('solicitante_data');
-        let nombre = '', apellido = '', cedula = '', direccion = '', email = '', telefono = '';
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
-                nombre = parsed.nombre || '';
-                apellido = parsed.apellido || '';
-                cedula = parsed.cedula || '';
-                direccion = parsed.direccion || '';
-                email = parsed.email || '';
-                telefono = parsed.telefono || '';
-            } catch(e) {}
+                Object.assign(userData, parsed);
+            } catch (e) { /* ignorar */ }
         }
-
-        const html = `
-            <div style="width:100%;">
-                <div class="row g-2">
-                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="f_nombre" placeholder="Nombre" value="${nombre}" required></div>
-                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="f_apellido" placeholder="Apellido" value="${apellido}" required></div>
-                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="f_cedula" placeholder="Cédula (V12345678)" value="${cedula}" required></div>
-                    <div class="col-6"><input type="text" class="form-control form-control-sm" id="f_direccion" placeholder="Dirección" value="${direccion}" required></div>
-                    <div class="col-6"><input type="email" class="form-control form-control-sm" id="f_email" placeholder="Correo" value="${email}" required></div>
-                    <div class="col-6"><input type="tel" class="form-control form-control-sm" id="f_telefono" placeholder="Teléfono (04121234567)" value="${telefono}" required></div>
-                </div>
-                <button class="btn-enviar-datos" id="btnGuardarDatos">Guardar datos</button>
-                <div id="errorDatos" class="error-text"></div>
-            </div>
-        `;
-        addMessage('Por favor completa tus datos:', true, html);
-
-        // Evento del botón guardar
-        document.getElementById('btnGuardarDatos').addEventListener('click', function() {
-            const nombre = document.getElementById('f_nombre').value.trim();
-            const apellido = document.getElementById('f_apellido').value.trim();
-            const cedula = document.getElementById('f_cedula').value.trim();
-            const direccion = document.getElementById('f_direccion').value.trim();
-            const email = document.getElementById('f_email').value.trim();
-            const telefono = document.getElementById('f_telefono').value.trim();
-
-            // Validaciones
-            let errorMsg = '';
-            if (!nombre) errorMsg += 'Nombre obligatorio. ';
-            if (!apellido) errorMsg += 'Apellido obligatorio. ';
-            if (!validarCedula(cedula)) errorMsg += 'Cédula inválida (ej: V12345678). ';
-            if (!direccion) errorMsg += 'Dirección obligatoria. ';
-            if (!validarEmail(email)) errorMsg += 'Email inválido. ';
-            if (!validarTelefono(telefono)) errorMsg += 'Teléfono inválido (mínimo 10 dígitos). ';
-
-            if (errorMsg) {
-                document.getElementById('errorDatos').textContent = errorMsg;
-                return;
-            }
-
-            // Guardar en userData y localStorage
-            userData = { nombre, apellido, cedula, direccion, email, telefono };
-            localStorage.setItem('solicitante_data', JSON.stringify(userData));
-
-            // Confirmar y pasar a categoría
-            addMessage('✅ Datos guardados correctamente.', false);
-            addMessage('Ahora selecciona la <strong>categoría</strong> de tu solicitud.', true);
-            setTimeout(() => mostrarCategorias(), 500);
-        });
     }
 
-    // ---------- PASO 2: CATEGORÍA ----------
-    function mostrarCategorias() {
-        step = 'categoria';
-        const categorias = [
-            { label: 'Educación, Cultura y Recreación', icon: 'fa-graduation-cap' },
-            { label: 'Vivienda y Hábitat', icon: 'fa-home' },
-            { label: 'Protección Social', icon: 'fa-hand-holding-heart' },
-            { label: 'Salud', icon: 'fa-heartbeat' },
-            { label: 'Economía Comunal y Socio-productiva', icon: 'fa-handshake' },
-            { label: 'Agua y Servicios Públicos', icon: 'fa-tint' },
-            { label: 'Seguridad y Defensa Integral', icon: 'fa-shield-alt' },
-            { label: 'Ecosocialismo / Medio Ambiente', icon: 'fa-leaf' }
-        ];
-
-        let html = '<div style="display:flex; flex-wrap:wrap; gap:4px;">';
-        categorias.forEach(cat => {
-            html += `<button class="btn-categoria" data-categoria="${cat.label}"><i class="fas ${cat.icon}"></i> ${cat.label}</button>`;
-        });
-        html += '</div><div id="errorCategoria" class="error-text"></div>';
-
-        addMessage('Selecciona una categoría:', true, html);
-
-        // Eventos para los botones de categoría
-        document.querySelectorAll('.btn-categoria').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const selected = this.getAttribute('data-categoria');
-                categoriaSeleccionada = selected;
-                // Marcar visualmente
-                document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('seleccionada'));
-                this.classList.add('seleccionada');
-                document.getElementById('errorCategoria').textContent = '';
-
-                // Confirmar y pasar a descripción
-                addMessage(`📌 Has seleccionado: <strong>${selected}</strong>`, false);
-                addMessage('Ahora describe tu solicitud en detalle (mínimo 10 caracteres).', true);
-                setTimeout(() => mostrarDescripcion(), 500);
-            });
-        });
+    // Guardar datos en localStorage
+    function saveLocalData() {
+        localStorage.setItem('solicitante_data', JSON.stringify(userData));
     }
 
-    // ---------- PASO 3: DESCRIPCIÓN ----------
-    function mostrarDescripcion() {
-        step = 'descripcion';
-        const html = `
-            <div>
-                <textarea id="f_descripcion" rows="3" style="width:100%; padding:8px; border-radius:10px; border:2px solid #ddd;" placeholder="Describe tu solicitud..."></textarea>
-                <div id="errorDescripcion" class="error-text"></div>
-                <button class="btn-enviar-datos" id="btnConfirmarDescripcion">Confirmar descripción</button>
-            </div>
-        `;
-        addMessage('Escribe tu solicitud:', true, html);
-
-        document.getElementById('btnConfirmarDescripcion').addEventListener('click', function() {
-            const desc = document.getElementById('f_descripcion').value.trim();
-            if (desc.length < 10) {
-                document.getElementById('errorDescripcion').textContent = 'La descripción debe tener al menos 10 caracteres.';
-                return;
-            }
-            descripcionEscrita = desc;
-            addMessage('📝 Descripción: ' + desc, false);
-            addMessage('✅ Todo listo. Revisa los datos y presiona <strong>Finalizar</strong> para enviar tu solicitud.', true);
-            // Mostrar botón finalizar
-            mostrarBotonFinalizar();
-        });
-    }
-
-    // ---------- PASO 4: BOTÓN FINALIZAR ----------
-    function mostrarBotonFinalizar() {
-        step = 'final';
-        const html = `
-            <button class="btn-finalizar" id="btnFinalizar">📨 Finalizar y enviar solicitud</button>
-            <div id="errorFinal" class="error-text"></div>
-        `;
-        addMessage('', true, html);
-
-        document.getElementById('btnFinalizar').addEventListener('click', async function() {
-            const btn = this;
-            btn.disabled = true;
-            btn.textContent = '⏳ Enviando...';
-
-            try {
-                const solicitud = {
-                    nombre: userData.nombre,
-                    apellido: userData.apellido,
-                    cedula: userData.cedula,
-                    direccion: userData.direccion,
-                    email: userData.email,
-                    telefono: userData.telefono.replace(/\D/g, ''),
-                    categoria: categoriaSeleccionada,
-                    descripcion: descripcionEscrita,
-                    timestamp_solicitud: firebase.firestore.FieldValue.serverTimestamp(),
-                    estado: 'pendiente',
-                    timestamp_respuesta: null,
-                    respuesta: null
-                };
-
-                await db.collection('solicitudes').add(solicitud);
-
-                addMessage('✅ <strong>¡Solicitud enviada con éxito!</strong>', false);
-                addMessage('El consejo comunal la revisará y te responderá al correo.', true);
-                // Resetear flujo (pero mantener datos)
-                step = 'inicio';
-                categoriaSeleccionada = '';
-                descripcionEscrita = '';
-                // Ocultar el botón finalizar (ya no se necesita)
-                btn.style.display = 'none';
-                // Mostrar opción para nueva solicitud
-                addMessage('¿Quieres hacer otra solicitud? Haz clic en "Nueva solicitud"', true);
-                const htmlNew = `<button class="btn-enviar-datos" id="btnNuevaSolicitud">🔄 Nueva solicitud</button>`;
-                addMessage('', true, htmlNew);
-                document.getElementById('btnNuevaSolicitud').addEventListener('click', function() {
-                    iniciarFlujo();
-                });
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('errorFinal').textContent = 'Error al enviar. Intenta de nuevo.';
-                btn.disabled = false;
-                btn.textContent = '📨 Finalizar y enviar solicitud';
-            }
-        });
-    }
-
-    // ============================================================
-    // VALIDACIONES (igual que antes)
-    // ============================================================
-    function validarCedula(cedula) {
-        return /^[VEve]\d{5,8}$/.test(cedula);
+    // Validaciones
+    function validarCedula(ced) {
+        return /^[VEve]\d{5,8}$/.test(ced);
     }
     function validarEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
     function validarTelefono(tel) {
-        return tel.replace(/\D/g, '').length >= 10 && tel.replace(/\D/g, '').length <= 11;
+        const numeros = tel.replace(/\D/g, '');
+        return numeros.length >= 10 && numeros.length <= 11;
     }
 
-    // ============================================================
-    // EVENTOS DEL WIDGET
-    // ============================================================
-    toggleBtn.addEventListener('click', function() {
+    // =====================================================
+    // RENDERIZAR PASOS
+    // =====================================================
+
+    function renderStep(step) {
+        let html = '';
+        switch (step) {
+            case 0: // Datos personales
+                html = `
+                    <div class="step-container">
+                        <div class="step-label"><i class="fas fa-user"></i> Tus datos personales</div>
+                        <input class="step-input" id="inputNombre" placeholder="Nombre" value="${userData.nombre}">
+                        <input class="step-input" id="inputApellido" placeholder="Apellido" value="${userData.apellido}">
+                        <input class="step-input" id="inputCedula" placeholder="Cédula (V12345678)" value="${userData.cedula}">
+                        <input class="step-input" id="inputDireccion" placeholder="Dirección" value="${userData.direccion}">
+                        <input class="step-input" id="inputEmail" placeholder="Correo electrónico" value="${userData.email}">
+                        <input class="step-input" id="inputTelefono" placeholder="Teléfono (04121234567)" value="${userData.telefono}">
+                        <button class="btn-step" id="btnStep0">Continuar →</button>
+                    </div>
+                `;
+                break;
+            case 1: // Categoría
+                const categorias = [
+                    { id: 'educacion', label: 'Educación, Cultura y Recreación', icon: 'fa-graduation-cap', cls: 'cat-educacion' },
+                    { id: 'vivienda', label: 'Vivienda y Hábitat', icon: 'fa-home', cls: 'cat-vivienda' },
+                    { id: 'proteccion', label: 'Protección Social', icon: 'fa-hand-holding-heart', cls: 'cat-proteccion' },
+                    { id: 'salud', label: 'Salud', icon: 'fa-heartbeat', cls: 'cat-salud' },
+                    { id: 'economia', label: 'Economía Comunal y Socio-productiva', icon: 'fa-handshake', cls: 'cat-economia' },
+                    { id: 'agua', label: 'Agua y Servicios Públicos', icon: 'fa-tint', cls: 'cat-agua' },
+                    { id: 'seguridad', label: 'Seguridad y Defensa Integral', icon: 'fa-shield-alt', cls: 'cat-seguridad' },
+                    { id: 'ecosocialismo', label: 'Ecosocialismo / Medio Ambiente', icon: 'fa-leaf', cls: 'cat-ecosocialismo' }
+                ];
+                let btns = categorias.map(c => `
+                    <button class="cat-btn ${c.cls}" data-label="${c.label}" data-icon="${c.icon}">
+                        <i class="fas ${c.icon}"></i> ${c.label.length > 25 ? c.label.substring(0,22)+'…' : c.label}
+                    </button>
+                `).join('');
+                html = `
+                    <div class="step-container">
+                        <div class="step-label"><i class="fas fa-tags"></i> Selecciona una categoría</div>
+                        <div class="categoria-grid" id="categoriaGrid">${btns}</div>
+                        <button class="btn-step" id="btnStep1" disabled>Continuar →</button>
+                    </div>
+                `;
+                break;
+            case 2: // Descripción
+                html = `
+                    <div class="step-container">
+                        <div class="step-label"><i class="fas fa-align-left"></i> Describe tu solicitud (mínimo 10 caracteres)</div>
+                        <textarea class="step-input" id="inputDescripcion" rows="3" placeholder="Detalla tu solicitud...">${descripcion}</textarea>
+                        <button class="btn-step" id="btnStep2">Continuar →</button>
+                    </div>
+                `;
+                break;
+            case 3: // Finalizar
+                const resumen = `
+                    <strong>${userData.nombre} ${userData.apellido}</strong><br>
+                    Cédula: ${userData.cedula}<br>
+                    Categoría: ${categoriaSeleccionada}<br>
+                    Descripción: ${descripcion.substring(0,50)}${descripcion.length>50?'…':''}
+                `;
+                html = `
+                    <div class="step-container">
+                        <div class="step-label"><i class="fas fa-check-circle"></i> Revisa y confirma</div>
+                        <div style="font-size:13px; background:#f8f9fa; padding:10px; border-radius:8px;">
+                            ${resumen}
+                        </div>
+                        <button class="btn-step" id="btnStep3"><i class="fas fa-paper-plane"></i> Enviar solicitud</button>
+                    </div>
+                `;
+                break;
+            default: return;
+        }
+        stepContainer.innerHTML = html;
+        // Asignar eventos según el paso
+        attachStepEvents(step);
+    }
+
+    // Asignar eventos a los elementos del paso actual
+    function attachStepEvents(step) {
+        switch (step) {
+            case 0: {
+                const btn = document.getElementById('btnStep0');
+                btn.addEventListener('click', () => {
+                    // Recoger valores
+                    const nombre = document.getElementById('inputNombre').value.trim();
+                    const apellido = document.getElementById('inputApellido').value.trim();
+                    const cedula = document.getElementById('inputCedula').value.trim();
+                    const direccion = document.getElementById('inputDireccion').value.trim();
+                    const email = document.getElementById('inputEmail').value.trim();
+                    const telefono = document.getElementById('inputTelefono').value.trim();
+
+                    // Validar
+                    let errors = [];
+                    if (!nombre) errors.push('Nombre');
+                    if (!apellido) errors.push('Apellido');
+                    if (!validarCedula(cedula)) errors.push('Cédula (formato V/E + 5-8 dígitos)');
+                    if (!direccion) errors.push('Dirección');
+                    if (!validarEmail(email)) errors.push('Correo electrónico');
+                    if (!validarTelefono(telefono)) errors.push('Teléfono (mínimo 10 dígitos)');
+
+                    if (errors.length > 0) {
+                        addMessage(`⚠️ Por favor corrige: ${errors.join(', ')}`, true);
+                        return;
+                    }
+
+                    // Guardar en userData y localStorage
+                    Object.assign(userData, { nombre, apellido, cedula, direccion, email, telefono });
+                    saveLocalData();
+
+                    // Mensaje de confirmación
+                    addMessage(`✅ Datos guardados. Ahora selecciona la categoría de tu solicitud.`, true);
+                    // Avanzar al paso 1
+                    currentStep = 1;
+                    renderStep(currentStep);
+                });
+                break;
+            }
+            case 1: {
+                const grid = document.getElementById('categoriaGrid');
+                const btn = document.getElementById('btnStep1');
+                let selectedLabel = '';
+
+                grid.querySelectorAll('.cat-btn').forEach(b => {
+                    b.addEventListener('click', () => {
+                        grid.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+                        b.classList.add('active');
+                        selectedLabel = b.getAttribute('data-label');
+                        btn.disabled = false;
+                    });
+                });
+
+                btn.addEventListener('click', () => {
+                    if (!selectedLabel) return;
+                    categoriaSeleccionada = selectedLabel;
+                    addMessage(`📌 Has seleccionado: <strong>${categoriaSeleccionada}</strong>`, false);
+                    addMessage(`👍 Perfecto. Ahora describe tu solicitud en detalle.`, true);
+                    currentStep = 2;
+                    renderStep(currentStep);
+                });
+                break;
+            }
+            case 2: {
+                const btn = document.getElementById('btnStep2');
+                const textarea = document.getElementById('inputDescripcion');
+                textarea.addEventListener('input', () => {
+                    descripcion = textarea.value;
+                });
+                btn.addEventListener('click', () => {
+                    descripcion = textarea.value.trim();
+                    if (descripcion.length < 10) {
+                        addMessage('⚠️ La descripción debe tener al menos 10 caracteres.', true);
+                        return;
+                    }
+                    addMessage(`📝 Descripción registrada.`, false);
+                    addMessage(`✅ Listo. Revisa los datos y confirma el envío.`, true);
+                    currentStep = 3;
+                    renderStep(currentStep);
+                });
+                break;
+            }
+            case 3: {
+                const btn = document.getElementById('btnStep3');
+                btn.addEventListener('click', async () => {
+                    // Enviar a Firebase
+                    const telefonoLimpio = userData.telefono.replace(/\D/g, '');
+                    const nuevaSolicitud = {
+                        nombre: userData.nombre,
+                        apellido: userData.apellido,
+                        cedula: userData.cedula,
+                        direccion: userData.direccion,
+                        email: userData.email,
+                        telefono: telefonoLimpio,
+                        categoria: categoriaSeleccionada,
+                        descripcion: descripcion,
+                        timestamp_solicitud: firebase.firestore.FieldValue.serverTimestamp(),
+                        estado: 'pendiente',
+                        timestamp_respuesta: null,
+                        respuesta: null
+                    };
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                        await db.collection('solicitudes').add(nuevaSolicitud);
+                        addMessage(`✅ ¡Solicitud enviada con éxito! Recibirás respuesta al correo ${userData.email}.`, true);
+                        // Reiniciar flujo después de 3 segundos
+                        setTimeout(() => {
+                            resetChat(); // Usamos resetChat para limpiar todo
+                        }, 5000);
+                    } catch (error) {
+                        console.error(error);
+                        addMessage('❌ Error al enviar. Intenta de nuevo más tarde.', true);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Reintentar';
+                    }
+                });
+                break;
+            }
+            default: break;
+        }
+    }
+
+    // =====================================================
+    // FUNCIÓN REINICIAR CHAT
+    // =====================================================
+    function resetChat() {
+        // Restablecer variables de sesión (conservamos userData y localStorage)
+        currentStep = 0;
+        categoriaSeleccionada = '';
+        descripcion = '';
+        // No borramos userData para que el usuario no tenga que reescribir sus datos
+        // pero si queremos que también se limpien los datos personales, descomentar:
+        // userData = { nombre: '', apellido: '', cedula: '', direccion: '', email: '', telefono: '' };
+        // localStorage.removeItem('solicitante_data');
+        // En su lugar, dejamos los datos precargados.
+
+        // Limpiar mensajes y mostrar bienvenida
+        clearMessages();
+        addMessage('🔄 Chat reiniciado. Puedes comenzar de nuevo.', true);
+        addMessage('¡Hola! Soy el asistente virtual del Consejo Comunal Barrio Bolívar.', true);
+        addMessage('Para comenzar, ingresa tus datos personales en el formulario de abajo.', true);
+        if (userData.nombre) {
+            addMessage(`👋 Hola ${userData.nombre}, tus datos ya están cargados. Puedes modificarlos si lo deseas.`, true);
+        }
+        renderStep(currentStep);
+    }
+
+    // =====================================================
+    // INICIALIZACIÓN DEL CHAT (con efecto de apertura)
+    // =====================================================
+    function initChat() {
+        if (chatInitialized) return;
+        chatInitialized = true;
+
+        loadLocalData();
+        clearMessages();
+        addMessage('¡Hola! Soy el asistente virtual del Consejo Comunal Barrio Bolívar.', true);
+        addMessage('Para comenzar, ingresa tus datos personales en el formulario de abajo.', true);
+        if (userData.nombre) {
+            addMessage(`👋 Hola ${userData.nombre}, tus datos ya están cargados. Puedes modificarlos si lo deseas.`, true);
+        }
+        currentStep = 0;
+        renderStep(currentStep);
+    }
+
+    // =====================================================
+    // EVENTOS DE INTERFAZ
+    // =====================================================
+
+    // Abrir/cerrar con el botón flotante
+    chatToggleBtn.addEventListener('click', () => {
         if (chatWindow.classList.contains('open')) {
-            closeChat();
+            toggleChat(false);
         } else {
-            openChat();
+            toggleChat(true);
+            if (!chatInitialized) {
+                initChat();
+            }
         }
     });
 
-    closeBtn.addEventListener('click', closeChat);
+    // Cerrar con la X
+    chatMinimizeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleChat(false);
+        notifBadge.style.display = 'inline';
+        notifBadge.textContent = '1';
+    });
 
-    // Al cargar la página, si hay datos en localStorage, iniciar flujo automáticamente al abrir
-    // No lo iniciamos hasta que el usuario abra el chat.
-    // Mostrar badge de notificación (opcional)
-    // Podríamos mostrar un badge si hay solicitudes pendientes (pero eso es para otra funcionalidad)
+    // Reiniciar chat
+    chatResetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetChat();
+    });
 
-    // Inicialización: el chat permanece cerrado, pero preparamos el step
-    step = 'inicio';
-    // Si se abre, se ejecuta iniciarFlujo()
+    // =====================================================
+    // APERTURA AUTOMÁTICA AL CARGAR (con efecto)
+    // =====================================================
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            toggleChat(true);
+            initChat();
+            notifBadge.style.display = 'none';
+        }, 500);
+    });
+
+    console.log('✅ Chatbot con botón de reinicio. Asegúrate de tener la imagen en la ruta correcta.');
 </script>
-
 </body>
 </html>
